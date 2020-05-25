@@ -209,6 +209,55 @@ app.use(
 
 app.use(
 	router.get(
+		'/test-status',
+		(req, res, next) => {
+
+			let promises = [];
+
+			for(let i=0; i<1000; i++){
+
+				let worker = startNewWorker({
+					file: '/worker-2/worker22.js',
+					data: {
+						n: i
+					}
+				});
+
+				// let p1 = new Promise((resolve, reject) => {
+
+				// 	let p = axios({
+				// 		method: 'get',
+				// 		url: 'http://apidev.namoadigital.com/portal/status/',
+				// 	})
+
+				// 	p.then(response => resolve(response.data));
+				// 	p.catch(error => reject(error));
+
+				// });
+
+
+				promises.push(worker);
+
+			}
+
+
+			Promise.allSettled(promises)
+				.then(results => {
+					// res.json(results);
+					res.json({
+						fulfilled: results.filter(result => result.value.status).length,
+						rejected: results.filter(result => !result.value.status).length,
+						rejecteds: results.filter(result => !result.value.status)
+					});
+				})
+				.catch(error => res.status(500).json(error));
+
+		}
+	)
+);
+
+app.use(
+	router.get(
 		'/test4',
 		(req, res, next) => {
 
